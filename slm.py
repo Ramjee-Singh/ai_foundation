@@ -1,0 +1,145 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyN1g8cRnVCjNFuV7ARx38Dq",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/Ramjee-Singh/ai_foundation/blob/main/slm.py\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 2,
+      "metadata": {
+        "id": "XNiQZWLDVYXB"
+      },
+      "outputs": [],
+      "source": [
+        "import re"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### Create tokenizer class which should be able to handle following\n",
+        "\n",
+        "\n",
+        "1. **Tokenize** - Should be able to tokenize the texts\n",
+        "2. **Vocabulary** - Should create and store vocabulary from text corpus\n",
+        "3. **Token-id mapping**- Should be avble to conver token to id and vice versa to    use in AI/ML models.\n",
+        "\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "n10sH6ePVmFN"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from typing import Self\n",
+        "import re\n",
+        "\n",
+        "class Space_Tokenizer:\n",
+        "\n",
+        "  # Define constants.\n",
+        "  UNKNOWN_TOKEN = \"<UNK>\"\n",
+        "  PAD_TOKEN = \"<PAD>\"\n",
+        "\n",
+        "  def __init__(self, text: str, vocab: list = None): # Added self, changed vocab type hint, added default None\n",
+        "    if vocab: # Correctly checks if vocab is not None and not empty\n",
+        "      self.vocab_list = vocab\n",
+        "    else:\n",
+        "      self.vocab_list = self.build_vocab(text)\n",
+        "\n",
+        "    self.token_to_index = {}\n",
+        "    self.index_to_token = {}\n",
+        "    self.vocab_list = self.vocab_list + [self.UNKNOWN_TOKEN, self.PAD_TOKEN] # Corrected order of tokens\n",
+        "    print(f\"Built vocabulary: {self.vocab_list}\") # Improved print statement\n",
+        "\n",
+        "\n",
+        "    for index, token in enumerate(self.vocab_list): # Corrected order for enumerate\n",
+        "      self.token_to_index[token] = index\n",
+        "      self.index_to_token[index] = token\n",
+        "\n",
+        "  def build_vocab(self, text: str) -> list[str]: # Added self, added return type hint\n",
+        "    tokens = self.space_tokenizer(text)\n",
+        "    vocab_list = sorted(list(set((tokens))))\n",
+        "    return vocab_list\n",
+        "\n",
+        "  def space_tokenizer(self, text: str) -> list[str]: # Added self, added return type hint\n",
+        "    tokens = re.split(\" +\", text)\n",
+        "    return tokens\n",
+        "\n",
+        "  def encode(self, tokens: list[str]) -> list[int]: # Added self\n",
+        "    token_ids = []\n",
+        "    for token in tokens:\n",
+        "      if token in self.token_to_index:\n",
+        "        token_ids.append(self.token_to_index[token])\n",
+        "      else:\n",
+        "        # Handle unknown tokens, e.g., by skipping or using a special token ID\n",
+        "        print(f\"Warning: Token '{token}' not in vocabulary. Skipping.\")\n",
+        "    return token_ids\n",
+        "\n",
+        "  def decode(self, token_ids: list[int]) -> str: # Added self\n",
+        "    tokens = []\n",
+        "    for idx in token_ids: # Corrected from token_idx to token_ids\n",
+        "      if idx in self.index_to_token:\n",
+        "        tokens.append(self.index_to_token[idx])\n",
+        "      else:\n",
+        "        # Handle unknown indices\n",
+        "        print(f\"Warning: Index '{idx}' not found in vocabulary mapping. Using '<unk>'.\")\n",
+        "        tokens.append('<unk>')\n",
+        "    return \" \".join(tokens) # Corrected from \" \".join[tokens] to \" \".join(tokens)\n",
+        "\n",
+        "\n",
+        "text = \"Hello sir how are you Hello hope you are doing fine\"\n",
+        "space_tokenizer = Space_Tokenizer(text)\n",
+        "\n",
+        "# Example usage to verify\n",
+        "encoded_tokens = space_tokenizer.encode(space_tokenizer.space_tokenizer(text))\n",
+        "print(f\"Encoded tokens: {encoded_tokens}\")\n",
+        "decoded_text = space_tokenizer.decode(encoded_tokens)\n",
+        "print(f\"Decoded text: {decoded_text}\")\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "HM1LpU2oXa5t",
+        "outputId": "78dbf7dc-a4d8-4c67-9a23-3d588e02adc0"
+      },
+      "execution_count": 20,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Built vocabulary: ['Hello', 'are', 'doing', 'fine', 'hope', 'how', 'sir', 'you', '<UNK>', '<PAD>']\n",
+            "Encoded tokens: [0, 6, 5, 1, 7, 0, 4, 7, 1, 2, 3]\n",
+            "Decoded text: Hello sir how are you Hello hope you are doing fine\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
